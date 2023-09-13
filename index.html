@@ -1,55 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Parent Login</title>
+    <title>Student Information</title>
 </head>
 <body>
-    <h1>Parent Login</h1>
-    <form>
-        Mobile Number: <input type="text" id="mobileNumber"><br><br>
-        <button type="button" onclick="getCredentials()">Get Credentials</button>
-    </form>
-    <div id="credentials"></div>
+    <h1>Retrieve Student Information</h1>
+    <label for="mobile">Enter Mobile Number:</label>
+    <input type="text" id="mobile">
+    <button onclick="getStudentInfo()">Retrieve Info</button>
+    <div id="result"></div>
 
     <script>
-        function getCredentials() {
-            var mobileNumber = document.getElementById("mobileNumber").value;
+        function getStudentInfo() {
+            var mobileNumber = document.getElementById('mobile').value;
+            var url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTvv2m2YQqT3XukhA0wx-CTSbXAk8xeQ05W7dzUpsz7sACznw6jMXQlHL_v6-Th1dgtK_vQO3rghTXM/pubhtml'; // Replace with your Google Sheet publish link
+            var iframe = document.createElement('iframe');
+            iframe.src = url;
+            iframe.style.display = 'none';
+            iframe.onload = function() {
+                var data = iframe.contentDocument.querySelector('table').querySelectorAll('tr');
+                var result = '';
+                for (var i = 1; i < data.length; i++) {
+                    var row = data[i].querySelectorAll('td');
+                    var mobile = row[1].textContent;
+                    var username = row[4].textContent;
+                    var password = row[5].textContent;
 
-            // Replace 'SHEET_URL' with the URL of your published Google Sheets.
-            var sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQksn9ZwbWI8XCCbz_5BjarH7Aj5OFNR6ZV92XA3Oye4Q2EWcn4QCfSgM17LoIxMi1dLYgqQG-pQWSf/pubhtml?gid=228964814&single=true';
-
-            // Fetch data from Google Sheets.
-            fetch(sheetURL)
-                .then(response => response.text())
-                .then(data => {
-                    // Parse the CSV data from Google Sheets.
-                    var rows = data.split("\n");
-                    var headers = rows[0].split(",");
-                    var credentials = {};
-
-                    // Find the row with the matching mobile number.
-                    for (var i = 1; i < rows.length; i++) {
-                        var row = rows[i].split(",");
-                        if (row[1] === mobileNumber) {
-                            for (var j = 0; j < headers.length; j++) {
-                                credentials[headers[j]] = row[j];
-                            }
-                            break;
-                        }
+                    if (mobile === mobileNumber) {
+                        result = `Username: ${username}, Password: ${password}`;
+                        break;
                     }
+                }
 
-                    // Display the credentials.
-                    var credentialsDiv = document.getElementById("credentials");
-                    if (Object.keys(credentials).length > 0) {
-                        var credentialsHTML = "<h2>Credentials:</h2>";
-                        for (var key in credentials) {
-                            credentialsHTML += "<strong>" + key + ":</strong> " + credentials[key] + "<br>";
-                        }
-                        credentialsDiv.innerHTML = credentialsHTML;
-                    } else {
-                        credentialsDiv.innerHTML = "No credentials found for this mobile number.";
-                    }
-                });
+                if (result) {
+                    document.getElementById('result').textContent = result;
+                } else {
+                    document.getElementById('result').textContent = 'Student not found';
+                }
+            };
+            document.body.appendChild(iframe);
         }
     </script>
 </body>
