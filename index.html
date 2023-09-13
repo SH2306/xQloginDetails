@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parent Login</title>
+</head>
+<body>
+    <h1>Parent Login</h1>
+    <form>
+        Mobile Number: <input type="text" id="mobileNumber"><br><br>
+        <button type="button" onclick="getCredentials()">Get Credentials</button>
+    </form>
+    <div id="credentials"></div>
+
+    <script>
+        function getCredentials() {
+            var mobileNumber = document.getElementById("mobileNumber").value;
+
+            // Replace 'SHEET_URL' with the URL of your published Google Sheets.
+            var sheetURL = 'YOUR_GOOGLE_SHEET_URL';
+
+            // Fetch data from Google Sheets.
+            fetch(sheetURL)
+                .then(response => response.text())
+                .then(data => {
+                    // Parse the CSV data from Google Sheets.
+                    var rows = data.split("\n");
+                    var headers = rows[0].split(",");
+                    var credentials = {};
+
+                    // Find the row with the matching mobile number.
+                    for (var i = 1; i < rows.length; i++) {
+                        var row = rows[i].split(",");
+                        if (row[1] === mobileNumber) {
+                            for (var j = 0; j < headers.length; j++) {
+                                credentials[headers[j]] = row[j];
+                            }
+                            break;
+                        }
+                    }
+
+                    // Display the credentials.
+                    var credentialsDiv = document.getElementById("credentials");
+                    if (Object.keys(credentials).length > 0) {
+                        var credentialsHTML = "<h2>Credentials:</h2>";
+                        for (var key in credentials) {
+                            credentialsHTML += "<strong>" + key + ":</strong> " + credentials[key] + "<br>";
+                        }
+                        credentialsDiv.innerHTML = credentialsHTML;
+                    } else {
+                        credentialsDiv.innerHTML = "No credentials found for this mobile number.";
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
